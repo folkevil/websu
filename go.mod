@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	cloud.google.com/go v0.75.0
+	firebase.google.com/go/v4 v4.1.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/go-co-op/gocron v0.5.0

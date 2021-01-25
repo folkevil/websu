@@ -30,6 +30,7 @@ var (
 	GCPRegion         = ""
 	GCPTaskQueue      = ""
 	Scheduler         = ""
+	Auth              = ""
 )
 
 type App struct {
@@ -118,6 +119,10 @@ func (a *App) SetupRoutes() {
 }
 
 func (a *App) Run(address string) {
+	if Auth == "firebase" {
+		log.Info("Using firebase as authentication backend")
+		a.Router.Use(JwtMiddleware)
+	}
 	handler := cors.Default().Handler(a.Router)
 	s := &http.Server{
 		Addr:         address,
@@ -155,7 +160,14 @@ func (a *App) getReports(w http.ResponseWriter, r *http.Request) {
 	if limit == 0 {
 		limit = 50
 	}
-	reports, err := GetAllReports(limit, skip)
+	var reports []Report
+	if user := r.Context().Value("UserID"); user != nil {
+		log.WithField("user", user.(string)).Info("Getting reports for user")
+		query := map[string]interface{}{"user": user.(string)}
+		reports, err = GetReports(limit, skip, query)
+	} else {
+		reports, err = GetReports(limit, skip, nil)
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
